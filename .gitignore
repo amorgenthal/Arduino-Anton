@@ -1,4 +1,2 @@
-**/cmake-build-debug/
-**/cmake-build-debug
-**/.idea/
-**/.idea
+cmake-build-debug/
+.idea/
