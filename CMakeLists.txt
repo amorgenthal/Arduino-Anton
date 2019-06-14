@@ -8,7 +8,7 @@ set(${CMAKE_PROJECT_NAME}_SKETCH Anton.ino)
 #### Uncomment below additional settings as needed.
 # AUS https://github.com/francoiscampbell/arduino-cmake
 set(${CMAKE_PROJECT_NAME}_BOARD nano)
-set(${CMAKE_PROJECT_NAME}_PORT COM3)
+set(${CMAKE_PROJECT_NAME}_PORT COM5)
 #set(${CMAKE_PROJECT_NAME}_PORT /dev/ttyACM0)
 set(nano.build.mcu atmega328p)
 #set(nano.upload.protocol wiring)
