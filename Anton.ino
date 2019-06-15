@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <libraries/DFPlayer_Mini_Mp3_by_Makuna/src/DFMiniMp3.h>
 #include <EEPROM.h>
-#include <JC_Button.h>
-#include <MFRC522.h>
+#include <libraries/JC_Button/src/JC_Button.h>
+/*#include <MFRC522.h>*/
 #include <SPI.h>
 #include <SoftwareSerial.h>
 
@@ -12,6 +12,7 @@ uint16_t numTracksInFolder;
 uint16_t currentTrack;
 
 // this object stores nfc tag data
+
 struct nfcTagObject {
     uint32_t cookie;
     uint8_t version;
@@ -20,15 +21,16 @@ struct nfcTagObject {
     uint8_t special;
 };
 
+
 nfcTagObject myCard;
 
 static void nextTrack(uint16_t track);
 int voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
               bool preview, int previewFromFolder);
 
-bool readCard(nfcTagObject *nfcTag);
+/*bool readCard(nfcTagObject *nfcTag);
 void resetCard();
-void setupCard();
+void setupCard();*/
 
 bool knownCard = false;
 
@@ -173,13 +175,13 @@ static void previousTrack() {
 // MFRC522
 #define RST_PIN 9                 // Configurable, see typical pin layout above
 #define SS_PIN 10                 // Configurable, see typical pin layout above
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
-MFRC522::MIFARE_Key key;
+/*MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
+MFRC522::MIFARE_Key key;*/
 bool successRead;
 byte sector = 1;
 byte blockAddr = 4;
 byte trailerBlock = 7;
-MFRC522::StatusCode status;
+/*MFRC522::StatusCode status;*/
 
 #define buttonPause A0
 #define buttonUp A1
@@ -221,13 +223,12 @@ void setup() {
     mp3.setVolume(15);
 
     // NFC Leser initialisieren
-    SPI.begin();        // Init SPI bus
+/*    SPI.begin();        // Init SPI bus
     mfrc522.PCD_Init(); // Init MFRC522
-    mfrc522
-            .PCD_DumpVersionToSerial(); // Show details of PCD - MFRC522 Card Reader
+    mfrc522.PCD_DumpVersionToSerial(); // Show details of PCD - MFRC522 Card Reader
     for (byte i = 0; i < 6; i++) {
         key.keyByte[i] = 0xFF;
-    }
+    }*/
 
     // RESET --- ALLE DREI KNÖPFE BEIM STARTEN GEDRÜCKT HALTEN -> alle bekannten
     // Karten werden gelöscht
@@ -242,7 +243,7 @@ void setup() {
 }
 
 void loop() {
-    do {
+    //do {
         mp3.loop();
         // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
         // doppelt belegt werden
@@ -250,31 +251,35 @@ void loop() {
         upButton.read();
         downButton.read();
 
-        if (pauseButton.wasReleased()) {
-            if (ignorePauseButton == false) {
-                if (isPlaying())
-                    mp3.pause();
-                else
-                    mp3.start();
-            }
-            ignorePauseButton = false;
-        } else if (pauseButton.pressedFor(LONG_PRESS) &&
-                   ignorePauseButton == false) {
+    if (pauseButton.wasReleased()) {
+        Serial.println(F("pauseButton wasReleased..."));
+        mp3.playMp3FolderTrack(1);
+        /*if (ignorePauseButton == false) {
             if (isPlaying())
-                mp3.playAdvertisement(currentTrack);
-            else {
-                knownCard = false;
-                mp3.playMp3FolderTrack(800);
-                Serial.println(F("Karte resetten..."));
-                resetCard();
-                mfrc522.PICC_HaltA();
-                mfrc522.PCD_StopCrypto1();
-            }
-            ignorePauseButton = true;
+                mp3.pause();
+            else
+                mp3.start();
         }
+        ignorePauseButton = false;*/
+    }
 
-        if (upButton.pressedFor(LONG_PRESS)) {
-            Serial.println(F("Volume Up"));
+    /*else if (pauseButton.pressedFor(LONG_PRESS) &&
+             ignorePauseButton == false) {
+        if (isPlaying())
+            mp3.playAdvertisement(currentTrack);
+        else {
+            knownCard = false;
+            mp3.playMp3FolderTrack(800);
+            Serial.println(F("Karte resetten..."));
+*//*                resetCard();
+                mfrc522.PICC_HaltA();
+                mfrc522.PCD_StopCrypto1();*//*
+        }
+        ignorePauseButton = true;
+    }*/
+
+    /*if (upButton.pressedFor(LONG_PRESS)) {
+        Serial.println(F("Volume Up"));
             mp3.increaseVolume();
             ignoreUpButton = true;
         } else if (upButton.wasReleased()) {
@@ -294,12 +299,12 @@ void loop() {
             else
                 ignoreDownButton = false;
         }
-        // Ende der Buttons
-    } while (!mfrc522.PICC_IsNewCardPresent());
+    */    // Ende der Buttons
+    //} while (!mfrc522.PICC_IsNewCardPresent());
 
     // RFID Karte wurde aufgelegt
 
-    if (!mfrc522.PICC_ReadCardSerial())
+    /*if (!mfrc522.PICC_ReadCardSerial())
         return;
 
     if (readCard(&myCard) == true) {
@@ -353,9 +358,9 @@ void loop() {
             knownCard = false;
             setupCard();
         }
-    }
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
+    }*/
+/*    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();*/
 }
 
 int voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
@@ -440,7 +445,7 @@ int voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
     } while (true);
 }
 
-void writeCard(nfcTagObject nfcTag) {
+/*void writeCard(nfcTagObject nfcTag) {
     MFRC522::PICC_Type mifareType;
     byte buffer[16] = {0x13, 0x37, 0xb3, 0x47, // 0x1337 0xb347 magic cookie to
             // identify our nfc tags
@@ -481,9 +486,9 @@ void writeCard(nfcTagObject nfcTag) {
         mp3.playMp3FolderTrack(400);
     Serial.println();
     delay(100);
-}
+}*/
 
-void setupCard() {
+/*void setupCard() {
     mp3.pause();
     Serial.print(F("Neue Karte konfigurieren"));
 
@@ -508,9 +513,9 @@ void setupCard() {
     // Karte ist konfiguriert -> speichern
     mp3.pause();
     writeCard(myCard);
-}
+}*/
 
-void resetCard() {
+/*void resetCard() {
     do {
         pauseButton.read();
         upButton.read();
@@ -528,10 +533,11 @@ void resetCard() {
 
     Serial.print(F("Karte wird neu Konfiguriert!"));
     setupCard();
-}
+}*/
 
 
 
+/*
 bool readCard(nfcTagObject *nfcTag) {
     bool returnValue = true;
     // Show some details of the PICC (that is: the tag/card)
@@ -592,6 +598,4 @@ bool readCard(nfcTagObject *nfcTag) {
 
     return returnValue;
 }
-
-
-
+*/
