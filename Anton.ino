@@ -1,3 +1,7 @@
+//Source Code inspired by Tonuino project
+//https://github.com/xfjx/TonUINO
+//https://www.voss.earth/tonuino/
+
 //Includes for IntelliJ CLion
 #include <Arduino.h>
 #include <libraries/DFPlayer_Mini_Mp3_by_Makuna/src/DFMiniMp3.h>
